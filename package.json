@@ -12,6 +12,7 @@
     "lint": "prettier --ignore-path ../../.prettierignore --write '.' && eslint --fix \"**/*.ts\""
   },
   "devDependencies": {
+    "@con-rose/devopsservice": "github:ConRose456/SE-DevOpsService",
     "@eslint/eslintrc": "^3.3.1",
     "@types/jest": "^29.5.14",
     "@types/node": "22.7.9",
