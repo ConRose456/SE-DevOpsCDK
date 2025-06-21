@@ -4,10 +4,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "SE-DevOps/**"
-      - "SE-DevOpsService/**"
-      - "SE-DevOpsCDK/**"
+    repository_dispatch:
+      types: [trigger_build]
 
 jobs:
   build:
