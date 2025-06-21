@@ -87,9 +87,11 @@ jobs:
         run: |
           npm install -g aws-cdk
           npm install -g ts-node
+          npm install -g jsii
 
       - name: Deploy to Beta Stage with CDK
         run: |
+          ls
           cdk deploy Beta-ServiceStack --require-approval never
 
 
