@@ -85,6 +85,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          npm install -g aws-cdk
+          npm install -g aws-cdk-lib
           npm install -g ts-node
 
       - name: Deploy to Beta Stage with CDK
