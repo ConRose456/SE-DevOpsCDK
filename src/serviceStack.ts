@@ -40,7 +40,7 @@ export class DevOpsCdkStack extends Stack {
       {
         sources: [
           Source.asset(
-            path.resolve(__dirname, "../node_modules/@conrose456/dev_ops/out"),
+            path.resolve(__dirname, "../node_modules/@conrose456/devops/out"),
           ),
         ],
         destinationBucket: webAssetsBucket,
