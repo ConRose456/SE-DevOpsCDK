@@ -1,0 +1,69 @@
+name: CI/CD Pipiline for DevOps Assignment
+
+on push:
+  branches: 
+    - main
+  paths:
+  - 'devops/**'
+  - 'devopsservice/**'
+  - 'devopscdk/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      repos: ${{ steps.detect_changes.outputs.repos }}
+    steps:
+      - name: Checkout devops
+        uses: actions/checkout@v4
+        with:
+          repository: conrose/devops
+          token: ${{ secrects.GITHUB_TOKEN }}
+          path: devops
+
+      - name: Checkout devopsservice
+        uses: actions/checkout@v4
+        with:
+          repository: conrose/devopsservice
+          token: ${{ secrects.GITHUB_TOKEN }}
+          path: devopsservice
+
+      - name: Checkout devopscdk
+        uses: actions/checkout@v4
+        with:
+          repository: conrose/devopscdk
+          token: ${{ secrects.GITHUB_TOKEN }}
+          path: devopscdk
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd devops && npm install
+          cd devopsservice && npm install
+          cd devopscdk && npm install
+
+      - name: Add repostories to repos env
+        id: add-repostories
+        run: |
+          repos="devops devopsservice devopscdk"
+          echo "repositories=${repos}" >> ${GITHUB_ENV}
+          echo "repositories=${repos}" >> ${GITHUB_OUTPUT}
+
+      - name: Build repositories
+        run: |
+          for repo in ${{ env.repositories }}; do
+            echo "Building $repo"
+            cd $repo && npm run build
+          done
+    
+      - name: Commit build atrifacts
+        run: | 
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Build modified repos" || echo "No Changes to commit"
+          git push
