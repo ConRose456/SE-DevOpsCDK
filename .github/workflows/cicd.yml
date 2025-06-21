@@ -60,11 +60,27 @@ jobs:
             cd $repo && npm run build
             cd ../
           done
+  beta:
+    runs-on: ubuntu-latest
+    needs: build
+    environment: beta 
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
 
-      - name: Commit build atrifacts
+      - name: Install AWS CDK
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add .
-          git commit -m "Build modified repos" || echo "No Changes to commit"
-          git push
+          cd devopscdk
+          npm install -g aws-cdk
+
+      - name: Deploy to Beta Stage with CDK
+        run: |
+          cd devopscdk
+          cdk deploy Beta-ServiceStack --require-approval never
+
+
+
