@@ -57,7 +57,9 @@ jobs:
         run: |
           for repo in devops devopsservice devopscdk; do
             echo "Building $repo"
-            cd ../$repo && npm run build
+            ls
+            cd $repo && npm run build
+            ls
           done
 
       - name: Commit build atrifacts
