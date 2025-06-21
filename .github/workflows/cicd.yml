@@ -42,6 +42,11 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Configure npm to use GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.MY_GH_PAT }}" > ~/.npmrc
+          echo "@conrose456:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+
       - name: Install dependencies
         run: |
           cd devops && npm install
