@@ -5,9 +5,9 @@ on:
     branches:
       - main
     paths:
-      - "devops/**"
-      - "devopsservice/**"
-      - "devopscdk/**"
+      - "SE-DevOps/**"
+      - "SE-DevOpsService/**"
+      - "SE-DevOpsCDK/**"
 
 jobs:
   build:
