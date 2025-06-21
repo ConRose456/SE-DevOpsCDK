@@ -85,6 +85,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          npm install
           npm install -g aws-cdk
           npm install -g ts-node
           npm install -g jsii
