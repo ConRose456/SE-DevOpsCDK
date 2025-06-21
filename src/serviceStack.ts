@@ -22,7 +22,13 @@ interface ServiceStackProps extends Omit<StackProps, "softwareType"> {
   stage: string;
 }
 
+export type ServiceLambdas = {
+  graphql?: Function;
+};
+
 export class DevOpsCdkStack extends Stack {
+  private lambdas: ServiceLambdas;
+
   constructor(scope: Construct, id: string, props: ServiceStackProps) {
     super(scope, id, props);
 
@@ -65,6 +71,9 @@ export class DevOpsCdkStack extends Stack {
         ),
       ),
     });
+    this.lambdas = {
+      graphql: graphqlLambda,
+    };
 
     const httpApi = new HttpApi(this, `${props.stage}-GraphQlApiGateway`, {
       apiName: `${props.stage}-GraphQlService`,
@@ -84,6 +93,8 @@ export class DevOpsCdkStack extends Stack {
       ),
     });
   }
+
+  public getLambdas = (): ServiceLambdas => this.lambdas;
 }
 
 const createCloudFrontDist = ({
