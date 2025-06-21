@@ -5,11 +5,11 @@ const app = new App();
 
 // beta
 new DevOpsCdkStack(app, `Beta-ServiceStack`, {
-  stage: "Beta"
+  stage: "Beta",
 });
 
 // prod
 
 new DevOpsCdkStack(app, `Prod-ServiceStack`, {
-  stage: "Prod"
+  stage: "Prod",
 });

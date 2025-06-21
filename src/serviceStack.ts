@@ -1,5 +1,9 @@
 import { Duration, RemovalPolicy, StackProps, Stack } from "aws-cdk-lib";
-import { CorsHttpMethod, HttpApi, HttpMethod } from "aws-cdk-lib/aws-apigatewayv2";
+import {
+  CorsHttpMethod,
+  HttpApi,
+  HttpMethod,
+} from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import {
   CachePolicy,
@@ -34,9 +38,11 @@ export class DevOpsCdkStack extends Stack {
       this,
       `${props.stage}-DeployDefaultPage`,
       {
-        sources: [Source.asset(
-            path.resolve(__dirname, "../node_modules/@conrose456/dev_ops/out")
-        )],
+        sources: [
+          Source.asset(
+            path.resolve(__dirname, "../node_modules/@conrose456/dev_ops/out"),
+          ),
+        ],
         destinationBucket: webAssetsBucket,
         prune: false,
       },
@@ -50,26 +56,32 @@ export class DevOpsCdkStack extends Stack {
     });
 
     const graphqlLambda = new Function(this, `${props.stage}-GraphQlLambda`, {
-        runtime: Runtime.NODEJS_18_X,
-        handler: 'index.handler',
-        code: Code.fromAsset(
-            path.resolve(__dirname, '../node_modules/@conrose456/devopsservice/dist')
-        )
+      runtime: Runtime.NODEJS_18_X,
+      handler: "index.handler",
+      code: Code.fromAsset(
+        path.resolve(
+          __dirname,
+          "../node_modules/@conrose456/devopsservice/dist",
+        ),
+      ),
     });
 
     const httpApi = new HttpApi(this, `${props.stage}-GraphQlApiGateway`, {
-        apiName: `${props.stage}-GraphQlService`,
-        corsPreflight: {
-            allowOrigins: [`https://${distribution.domainName}`, "*"],
-            allowMethods: [CorsHttpMethod.POST, CorsHttpMethod.OPTIONS],
-            allowHeaders: ["Content-Type"]
-        }
+      apiName: `${props.stage}-GraphQlService`,
+      corsPreflight: {
+        allowOrigins: [`https://${distribution.domainName}`, "*"],
+        allowMethods: [CorsHttpMethod.POST, CorsHttpMethod.OPTIONS],
+        allowHeaders: ["Content-Type"],
+      },
     });
 
     httpApi.addRoutes({
-        path: "/graphql",
-        methods: [HttpMethod.POST],
-        integration: new HttpLambdaIntegration(`${props.stage}-LambdaIntegration`, graphqlLambda)
+      path: "/graphql",
+      methods: [HttpMethod.POST],
+      integration: new HttpLambdaIntegration(
+        `${props.stage}-LambdaIntegration`,
+        graphqlLambda,
+      ),
     });
   }
 }
@@ -82,7 +94,7 @@ const createCloudFrontDist = ({
 }: {
   scope: Construct;
   bucket: Bucket;
-  staticAssets: BucketDeployment
+  staticAssets: BucketDeployment;
   props: ServiceStackProps;
 }) => {
   const originAccessIdentity = new OriginAccessIdentity(
@@ -92,40 +104,36 @@ const createCloudFrontDist = ({
 
   bucket.grantRead(originAccessIdentity);
 
-  const distribution = new Distribution(
-    scope,
-    `${props.stage}-Distribution`,
-    {
-      defaultRootObject: "index.html",
-      errorResponses: [
-        {
-          httpStatus: 403,
-          responseHttpStatus: 403,
-          responsePagePath: "/404.html",
-          ttl: Duration.seconds(30),
-        },
-        {
-          httpStatus: 404,
-          responseHttpStatus: 404,
-          responsePagePath: "/404.html",
-          ttl: Duration.seconds(30),
-        },
-        {
-          httpStatus: 500,
-          responseHttpStatus: 500,
-          responsePagePath: "/404.html",
-          ttl: Duration.seconds(30),
-        },
-      ],
-      defaultBehavior: {
-        origin: S3BucketOrigin.withOriginAccessIdentity(bucket, {
-          originAccessIdentity,
-        }),
-        cachePolicy: CachePolicy.CACHING_OPTIMIZED,
-        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+  const distribution = new Distribution(scope, `${props.stage}-Distribution`, {
+    defaultRootObject: "index.html",
+    errorResponses: [
+      {
+        httpStatus: 403,
+        responseHttpStatus: 403,
+        responsePagePath: "/404.html",
+        ttl: Duration.seconds(30),
       },
+      {
+        httpStatus: 404,
+        responseHttpStatus: 404,
+        responsePagePath: "/404.html",
+        ttl: Duration.seconds(30),
+      },
+      {
+        httpStatus: 500,
+        responseHttpStatus: 500,
+        responsePagePath: "/404.html",
+        ttl: Duration.seconds(30),
+      },
+    ],
+    defaultBehavior: {
+      origin: S3BucketOrigin.withOriginAccessIdentity(bucket, {
+        originAccessIdentity,
+      }),
+      cachePolicy: CachePolicy.CACHING_OPTIMIZED,
+      viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
     },
-  );
+  });
   distribution.node.addDependency(staticAssets);
 
   return distribution;
