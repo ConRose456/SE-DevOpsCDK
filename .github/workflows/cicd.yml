@@ -44,7 +44,7 @@ jobs:
 
       - name: Configure npm to use GitHub Packages
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.MY_GH_PAT }}" > ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.MY_GH_PAT }}" > devopscdk/.npmrc
           echo "@conrose456:registry=https://npm.pkg.github.com/" >> ~/.npmrc
 
       - name: Install dependencies
