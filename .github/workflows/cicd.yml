@@ -45,14 +45,14 @@ jobs:
       - name: Install dependencies
         run: |
           cd devops && npm install
-          cd devopsservice && npm install
-          cd devopscdk && npm install
+          cd ../devopsservice && npm install
+          cd ../devopscdk && npm install
 
       - name: Build repositories
         run: |
           for repo in devops devopsservice devopscdk; do
             echo "Building $repo"
-            cd $repo && npm run build
+            cd ../$repo && npm run build
           done
 
       - name: Commit build atrifacts
