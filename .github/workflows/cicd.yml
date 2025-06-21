@@ -19,21 +19,21 @@ jobs:
       - name: Checkout devops
         uses: actions/checkout@v4
         with:
-          repository: conrose456/devops
+          repository: ConRose456/SE-DevOps
           token: ${{ secrets.MY_GH_PAT }}
           path: devops
 
       - name: Checkout devopsservice
         uses: actions/checkout@v4
         with:
-          repository: conrose456/devopsservice
+          repository: ConRose456/SE-DevOpsService
           token: ${{ secrets.MY_GH_PAT }}
           path: devopsservice
 
       - name: Checkout devopscdk
         uses: actions/checkout@v4
         with:
-          repository: conrose456/devopscdk
+          repository: ConRose456/SE-DevOpsCDK
           token: ${{ secrets.MY_GH_PAT }}
           path: devopscdk
 
