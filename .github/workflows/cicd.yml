@@ -1,6 +1,7 @@
 name: CI/CD Pipiline for DevOps Assignment
 
-on push:
+on:
+ push:
   branches: 
     - main
   paths:
