@@ -83,10 +83,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
 
+      - name: Configure npm to use GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.MY_GH_PAT }}" > ./.npmrc
+          echo "@conrose456:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+
       - name: Install Dependencies
         run: |
+          rm -rf node_modules package-lock.json
+          npm install
           npm install -g aws-cdk
-          npm install -g aws-cdk-lib
           npm install -g ts-node
 
       - name: Deploy to Beta Stage with CDK
