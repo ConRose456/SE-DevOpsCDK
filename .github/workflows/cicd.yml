@@ -20,21 +20,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: conrose/devops
-          token: ${{ secrects.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: devops
 
       - name: Checkout devopsservice
         uses: actions/checkout@v4
         with:
           repository: conrose/devopsservice
-          token: ${{ secrects.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: devopsservice
 
       - name: Checkout devopscdk
         uses: actions/checkout@v4
         with:
           repository: conrose/devopscdk
-          token: ${{ secrects.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: devopscdk
 
       - name: Set up Node.js
