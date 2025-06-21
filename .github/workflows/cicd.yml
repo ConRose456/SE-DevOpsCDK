@@ -19,21 +19,21 @@ jobs:
       - name: Checkout devops
         uses: actions/checkout@v4
         with:
-          repository: conrose/devops
+          repository: conrose456/devops
           token: ${{ secrets.GITHUB_TOKEN }}
           path: devops
 
       - name: Checkout devopsservice
         uses: actions/checkout@v4
         with:
-          repository: conrose/devopsservice
+          repository: conrose456/devopsservice
           token: ${{ secrets.GITHUB_TOKEN }}
           path: devopsservice
 
       - name: Checkout devopscdk
         uses: actions/checkout@v4
         with:
-          repository: conrose/devopscdk
+          repository: conrose456/devopscdk
           token: ${{ secrets.GITHUB_TOKEN }}
           path: devopscdk
 
