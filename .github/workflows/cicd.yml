@@ -5,7 +5,9 @@ on:
     branches:
       - main
   repository_dispatch:
-    types: [trigger_build]
+    types: 
+      - se-devops-trigger
+      - se-devopsservice-trigger
 
 jobs:
   build:
