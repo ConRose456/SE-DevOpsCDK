@@ -1,7 +1,6 @@
 name: CI/CD Pipiline for DevOps Assignment
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -99,6 +98,40 @@ jobs:
         run: |
           ls
           cdk deploy Beta-ServiceStack --require-approval never
+  
+  prod:
+    runs-on: ubuntu-latest
+    needs: build
+    environment: prod 
+    steps:
+      - name: Checkout repository artifacts from build stage
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Configure npm to use GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.MY_GH_PAT }}" > ./.npmrc
+          echo "@conrose456:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+
+      - name: Install Dependencies
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
+          npm install -g aws-cdk
+          npm install -g ts-node
+
+      - name: Deploy to Prod Stage with CDK
+        run: |
+          ls
+          cdk deploy Prod-ServiceStack --require-approval never
 
 
 
