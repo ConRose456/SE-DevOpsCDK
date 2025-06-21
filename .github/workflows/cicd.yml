@@ -48,16 +48,9 @@ jobs:
           cd devopsservice && npm install
           cd devopscdk && npm install
 
-      - name: Add repostories to repos env
-        id: add-repostories
-        run: |
-          repos="devops devopsservice devopscdk"
-          echo "repositories=${repos}" >> ${GITHUB_ENV}
-          echo "repositories=${repos}" >> ${GITHUB_OUTPUT}
-
       - name: Build repositories
         run: |
-          for repo in ${{ env.repositories }}; do
+          for repo in devops devopsservice devopscdk; do
             echo "Building $repo"
             cd $repo && npm run build
           done
