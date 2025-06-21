@@ -1,9 +1,9 @@
 {
-  "name": "dev_ops_cdk",
+  "name": "@conrose456/dev_ops_cdk",
   "version": "0.1.0",
-  "bin": {
-    "dev_ops_cdk": "bin/dev_ops_cdk.js"
-  },
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -12,7 +12,8 @@
     "lint": "prettier --ignore-path ../../.prettierignore --write '.' && eslint --fix \"**/*.ts\""
   },
   "devDependencies": {
-    "@con-rose/devopsservice": "github:ConRose456/SE-DevOpsService",
+    "@conrose456/dev_ops": "*",
+    "@conrose456/devopsservice": "*",
     "@eslint/eslintrc": "^3.3.1",
     "@types/jest": "^29.5.14",
     "@types/node": "22.7.9",

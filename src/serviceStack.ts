@@ -30,11 +30,13 @@ export class DevOpsCdkStack extends Stack {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
 
-    const defaultPage = new BucketDeployment(
+    const staticAssets = new BucketDeployment(
       this,
       `${props.stage}-DeployDefaultPage`,
       {
-        sources: [Source.data("index.html", `<!DOCTYPE html><html></html>`)],
+        sources: [Source.asset(
+            path.resolve(__dirname, "../node_modules/@conrose456/dev_ops/out")
+        )],
         destinationBucket: webAssetsBucket,
         prune: false,
       },
@@ -43,7 +45,7 @@ export class DevOpsCdkStack extends Stack {
     const distribution = createCloudFrontDist({
       scope: this,
       bucket: webAssetsBucket,
-      defaultPage,
+      staticAssets,
       props,
     });
 
@@ -51,15 +53,16 @@ export class DevOpsCdkStack extends Stack {
         runtime: Runtime.NODEJS_18_X,
         handler: 'index.handler',
         code: Code.fromAsset(
-            path.resolve(__dirname, '../node_modules/@con-rose/devopsservice/dist')
+            path.resolve(__dirname, '../node_modules/@conrose456/devopsservice/dist')
         )
     });
 
     const httpApi = new HttpApi(this, `${props.stage}-GraphQlApiGateway`, {
         apiName: `${props.stage}-GraphQlService`,
         corsPreflight: {
-            allowOrigins: [distribution.domainName],
-            allowMethods: [CorsHttpMethod.POST]
+            allowOrigins: [`https://${distribution.domainName}`, "*"],
+            allowMethods: [CorsHttpMethod.POST, CorsHttpMethod.OPTIONS],
+            allowHeaders: ["Content-Type"]
         }
     });
 
@@ -74,12 +77,12 @@ export class DevOpsCdkStack extends Stack {
 const createCloudFrontDist = ({
   scope,
   bucket,
-  defaultPage,
+  staticAssets,
   props,
 }: {
   scope: Construct;
   bucket: Bucket;
-  defaultPage: BucketDeployment;
+  staticAssets: BucketDeployment
   props: ServiceStackProps;
 }) => {
   const originAccessIdentity = new OriginAccessIdentity(
@@ -87,28 +90,30 @@ const createCloudFrontDist = ({
     "OriginAccessIdentity",
   );
 
+  bucket.grantRead(originAccessIdentity);
+
   const distribution = new Distribution(
     scope,
     `${props.stage}-Distribution`,
     {
-      defaultRootObject: "/index.html",
+      defaultRootObject: "index.html",
       errorResponses: [
         {
           httpStatus: 403,
           responseHttpStatus: 403,
-          responsePagePath: "/index.html",
+          responsePagePath: "/404.html",
           ttl: Duration.seconds(30),
         },
         {
           httpStatus: 404,
           responseHttpStatus: 404,
-          responsePagePath: "/index.html",
+          responsePagePath: "/404.html",
           ttl: Duration.seconds(30),
         },
         {
           httpStatus: 500,
           responseHttpStatus: 500,
-          responsePagePath: "/index.html",
+          responsePagePath: "/404.html",
           ttl: Duration.seconds(30),
         },
       ],
@@ -121,7 +126,7 @@ const createCloudFrontDist = ({
       },
     },
   );
-  distribution.node.addDependency(defaultPage);
+  distribution.node.addDependency(staticAssets);
 
   return distribution;
 };
