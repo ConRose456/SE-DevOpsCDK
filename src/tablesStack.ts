@@ -22,7 +22,18 @@ export class TablesStack extends Stack {
       removalPolicy:
         props.stage === "Beta" ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
     });
-
     catalogueTable.grantReadData(props.lambdas.graphql);
+
+    const userTable = new Table(this, `${props.stage}-UserTable`, {
+      tableName: `${props.stage}-Catalogue`,
+      partitionKey: {
+        name: ".partitionKey",
+        type: AttributeType.STRING,
+      },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy:
+        props.stage === "Beta" ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
+    });
+    userTable.grantReadWriteData(props.lambdas.graphql);
   }
 }
