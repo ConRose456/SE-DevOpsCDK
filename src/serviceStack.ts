@@ -71,6 +71,7 @@ export class DevOpsCdkStack extends Stack {
         ),
       ),
     });
+    graphqlLambda.addEnvironment("STAGE", props.stage);
     this.lambdas = {
       graphql: graphqlLambda,
     };
