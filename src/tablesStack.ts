@@ -25,7 +25,7 @@ export class TablesStack extends Stack {
     catalogueTable.grantReadData(props.lambdas.graphql);
 
     const userTable = new Table(this, `${props.stage}-UserTable`, {
-      tableName: `${props.stage}-Catalogue`,
+      tableName: `${props.stage}-User`,
       partitionKey: {
         name: ".partitionKey",
         type: AttributeType.STRING,
