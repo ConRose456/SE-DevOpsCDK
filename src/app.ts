@@ -10,6 +10,7 @@ const betaConfig = CONFIG.stages.beta;
 
 const betaService = new DevOpsCdkStack(app, `${betaConfig.name}-ServiceStack`, {
   stage: betaConfig.name,
+  config: betaConfig,
 });
 
 new TablesStack(app, `${betaConfig.name}-TablesStack`, {
@@ -22,6 +23,7 @@ const prodConfig = CONFIG.stages.prod;
 
 const prodService = new DevOpsCdkStack(app, `${prodConfig.name}-ServiceStack`, {
   stage: prodConfig.name,
+  config: prodConfig,
 });
 
 new TablesStack(app, `${prodConfig.name}-TablesStack`, {

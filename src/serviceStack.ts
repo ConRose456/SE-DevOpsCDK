@@ -6,12 +6,14 @@ import {
 } from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import {
+  AllowedMethods,
   CachePolicy,
   Distribution,
   OriginAccessIdentity,
+  OriginRequestPolicy,
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
-import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
+import { HttpOrigin, S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { Code, Function, Runtime } from "aws-cdk-lib/aws-lambda";
 import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
@@ -20,6 +22,7 @@ import * as path from "path";
 
 interface ServiceStackProps extends Omit<StackProps, "softwareType"> {
   stage: string;
+  config: { cloudFrontDomain: string };
 }
 
 export type ServiceLambdas = {
@@ -54,13 +57,6 @@ export class DevOpsCdkStack extends Stack {
       },
     );
 
-    const distribution = createCloudFrontDist({
-      scope: this,
-      bucket: webAssetsBucket,
-      staticAssets,
-      props,
-    });
-
     const graphqlLambda = new Function(this, `${props.stage}-GraphQlLambda`, {
       runtime: Runtime.NODEJS_18_X,
       handler: "index.handler",
@@ -79,9 +75,10 @@ export class DevOpsCdkStack extends Stack {
     const httpApi = new HttpApi(this, `${props.stage}-GraphQlApiGateway`, {
       apiName: `${props.stage}-GraphQlService`,
       corsPreflight: {
-        allowOrigins: [`https://${distribution.domainName}`, "*"],
+        allowOrigins: [props.config.cloudFrontDomain],
         allowMethods: [CorsHttpMethod.POST, CorsHttpMethod.OPTIONS],
         allowHeaders: ["Content-Type"],
+        allowCredentials: true,
       },
     });
 
@@ -93,6 +90,14 @@ export class DevOpsCdkStack extends Stack {
         graphqlLambda,
       ),
     });
+
+    const distribution = createCloudFrontDist({
+      scope: this,
+      bucket: webAssetsBucket,
+      staticAssets,
+      api: httpApi,
+      props,
+    });
   }
 
   public getLambdas = (): ServiceLambdas => this.lambdas;
@@ -102,11 +107,13 @@ const createCloudFrontDist = ({
   scope,
   bucket,
   staticAssets,
+  api,
   props,
 }: {
   scope: Construct;
   bucket: Bucket;
   staticAssets: BucketDeployment;
+  api: HttpApi;
   props: ServiceStackProps;
 }) => {
   const originAccessIdentity = new OriginAccessIdentity(
@@ -144,6 +151,17 @@ const createCloudFrontDist = ({
       }),
       cachePolicy: CachePolicy.CACHING_OPTIMIZED,
       viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+    },
+    additionalBehaviors: {
+      "/graphql": {
+        origin: new HttpOrigin(
+          `${api.apiId}.execute-api.eu-west-2.amazonaws.com`,
+        ), // Base API Gateway endpoint (without path)
+        allowedMethods: AllowedMethods.ALLOW_ALL,
+        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        cachePolicy: CachePolicy.CACHING_DISABLED,
+        originRequestPolicy: OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+      },
     },
   });
   distribution.node.addDependency(staticAssets);
