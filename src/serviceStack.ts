@@ -17,6 +17,7 @@ import { HttpOrigin, S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { Code, Function, Runtime } from "aws-cdk-lib/aws-lambda";
 import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 import * as path from "path";
 
@@ -67,6 +68,19 @@ export class DevOpsCdkStack extends Stack {
         ),
       ),
     });
+
+    const jwtSecret = new Secret(this, `${props.stage}-JWTSecret`, {
+      secretName: `${props.stage.toLowerCase()}jwt-secret-key`,
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({ username: "admin" }),
+        generateStringKey: "password",
+        passwordLength: 64,
+        excludeCharacters: '\"@/\\',
+      },
+    });
+    jwtSecret.grantRead(graphqlLambda);
+
+    graphqlLambda.addEnvironment("JWT_SECRET_NAME", jwtSecret.secretName);
     graphqlLambda.addEnvironment("STAGE", props.stage);
     this.lambdas = {
       graphql: graphqlLambda,
@@ -79,6 +93,7 @@ export class DevOpsCdkStack extends Stack {
         allowMethods: [CorsHttpMethod.POST, CorsHttpMethod.OPTIONS],
         allowHeaders: ["Content-Type"],
         allowCredentials: true,
+        exposeHeaders: ["Set-Cookie"],
       },
     });
 
@@ -91,7 +106,7 @@ export class DevOpsCdkStack extends Stack {
       ),
     });
 
-    const distribution = createCloudFrontDist({
+    createCloudFrontDist({
       scope: this,
       bucket: webAssetsBucket,
       staticAssets,
