@@ -22,7 +22,7 @@ export class TablesStack extends Stack {
       removalPolicy:
         props.stage === "Beta" ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
     });
-    catalogueTable.grantReadData(props.lambdas.graphql);
+    catalogueTable.grantReadWriteData(props.lambdas.graphql);
 
     const userTable = new Table(this, `${props.stage}-UserTable`, {
       tableName: `${props.stage}-User`,
