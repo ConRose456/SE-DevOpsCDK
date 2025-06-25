@@ -106,13 +106,15 @@ export class DevOpsCdkStack extends Stack {
       ),
     });
 
-    createCloudFrontDist({
+    const distribution = createCloudFrontDist({
       scope: this,
       bucket: webAssetsBucket,
       staticAssets,
       api: httpApi,
       props,
     });
+
+    graphqlLambda.addEnvironment("CLOUDFRONT_DOMAIN", distribution.domainName);
   }
 
   public getLambdas = (): ServiceLambdas => this.lambdas;
